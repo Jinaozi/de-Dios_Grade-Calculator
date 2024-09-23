@@ -1,1 +1,127 @@
-# de-Dios_Grade-Calculator
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade Calculator</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css">
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <style>
+        body {
+            font-family: Monospace, monospace;
+            background-color: #B0BBD2;
+            margin: 20px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 13px;
+            background-color: #F9B6A1;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label, input, button {
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #B0BBD2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #F9B6A1;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #E6E0D0;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Grade Calculator</h1>
+        <label for="absences">Number of Absences:</label>
+        <input type="number" id="absences" min="0"><br>
+        <label for="prelim">Prelim Exam Grade (0-100):</label>
+        <input type="number" id="prelim" min="0" max="100"><br>
+        <label for="quizzes">Quizzes Grade (0-100):</label>
+        <input type="number" id="quizzes" min="0" max="100"><br>
+        <label for="requirements">Requirements Grade (0-100):</label>
+        <input type="number" id="requirements" min="0" max="100"><br>
+        <label for="recitation">Recitation Grade (0-100):</label>
+        <input type="number" id="recitation" min="0" max="100"><br><br>
+        <button id="calculate-btn">Calculate</button>
+        <h2>Results</h2>
+        <p id="results"></p>
+    </div>
+    <py-script>
+        from pyscript import Element
+        def calculate_grades(*args):
+            # Get values from input fields
+            absences = Element("absences").element.value
+            prelim = Element("prelim").element.value
+            quizzes = Element("quizzes").element.value
+            requirements = Element("requirements").element.value
+            recitation = Element("recitation").element.value
+            results = Element("results")
+            try:
+                # Convert input values to appropriate types and validate ranges
+                absences = int(absences)
+                prelim = float(prelim)
+                quizzes = float(quizzes)
+                requirements = float(requirements)
+                recitation = float(recitation)
+                if absences < 0 or prelim < 0 or prelim > 100 or quizzes < 0 or quizzes > 100 or requirements < 0 or requirements > 100 or recitation < 0 or recitation > 100:
+                    results.element.innerHTML = "Please ensure all inputs are valid and within the proper range (0-100 for grades, 0+ for absences)."
+                    return
+                # Attendance Calculation
+                attendance = 100 - (absences * 10)
+                if absences >= 4:
+                    results.element.innerHTML = "FAILED due to 4 or more absences."
+                    return
+                # Class Standing Calculation
+                class_standing = (quizzes * 0.4) + (requirements * 0.3) + (recitation * 0.3)
+                # Prelim Grade Calculation
+                prelim_grade = (prelim * 0.6) + (attendance * 0.1) + (class_standing * 0.3)
+                # Display calculated Prelim Grade
+                message = f"Prelim Grade: {prelim_grade:.2f}<br>"
+                # Overall Grade Calculation Logic
+                passing_grade = 75
+                dean_lister_grade = 90
+                # Required Midterm and Final Grades for Passing and Dean's List
+                required_midterm_to_pass = (passing_grade - (prelim_grade * 0.2)) / 0.8
+                required_final_to_pass = (passing_grade - (prelim_grade * 0.2)) / 0.5
+                required_midterm_dean = (dean_lister_grade - (prelim_grade * 0.2)) / 0.8
+                required_final_dean = (dean_lister_grade - (prelim_grade * 0.2)) / 0.5
+                # Cap required grades within valid ranges (maximum of 100)
+                if required_midterm_to_pass > 100:
+                    required_midterm_to_pass = 100
+                if required_final_to_pass > 100:
+                    required_final_to_pass = 100
+                if required_midterm_dean > 100:
+                    required_midterm_dean = 100
+                if required_final_dean > 100:
+                    required_final_dean = 100
+                # Add information to the message
+                message += f"To pass, you need a mininmum Midterm Grade of {required_midterm_to_pass:.2f} and Final Grade of {required_final_to_pass:.2f}.<br>"
+                message += f"To be a Dean's Lister, you need a minimum Midterm Grade of {required_midterm_dean:.2f} and Final Grade of {required_final_dean:.2f}.<br>"
+                results.element.innerHTML = message
+            except ValueError:
+                results.element.innerHTML = "Please input valid numerical values."
+        # Bind the calculate_grades function to the button click event
+        Element("calculate-btn").element.onclick = calculate_grades
+    </py-script>
+</body>
+</html>
